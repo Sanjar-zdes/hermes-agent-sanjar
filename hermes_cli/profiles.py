@@ -863,6 +863,9 @@ def _cached_skill_count(profile_dir: Path) -> int:
 # never an error; the kanban decomposer falls back to the profile name.
 
 
+DEFAULT_PROFILE_DISPLAY_NAME = "Sanjar"
+
+
 def read_profile_meta(profile_dir: Path) -> dict:
     """Read ``profile.yaml`` -> ``{description, description_auto, display_name,
     previous_names}`` (empty defaults when missing/unreadable). Never raises — a
@@ -875,10 +878,14 @@ def read_profile_meta(profile_dir: Path) -> dict:
             hermes_bots = ui_meta.get("hermes-bots")
             if isinstance(hermes_bots, dict):
                 bot_title = str(hermes_bots.get("title") or "").strip()
+        display_name = str(data.get("display_name") or "").strip()
+        # Fresh clones show the default profile as the team's shipped name until renamed.
+        if not display_name and profile_dir == _get_default_hermes_home():
+            display_name = DEFAULT_PROFILE_DISPLAY_NAME
         return {
             "description": str(data.get("description") or "").strip(),
             "description_auto": bool(data.get("description_auto", False)),
-            "display_name": str(data.get("display_name") or "").strip(),
+            "display_name": display_name,
             "bot_title": bot_title,
             "previous_names": _clean_previous_names(data.get("previous_names")),
         }
